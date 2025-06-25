@@ -21,7 +21,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Logo } from "./components/logo";
+import { Logo } from "./logo";
+import { useAuth } from "@/context/auth-context";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import { ThemeToggleMenu } from "@/components/theme-toggle";
 
 type ActiveButton = "none" | "add" | "deepSearch" | "think";
 type MessageType = "user" | "system";
@@ -87,6 +101,8 @@ export default function ChatInterface() {
   const TOP_PADDING = 48; // pt-12 (3rem = 48px)
   const BOTTOM_PADDING = 128; // pb-32 (8rem = 128px)
   const ADDITIONAL_OFFSET = 16; // Reduced offset for fine-tuning
+
+  const { user, logout } = useAuth();
 
   // Check if device is mobile and get viewport height
   useEffect(() => {
@@ -289,13 +305,13 @@ export default function ChatInterface() {
 
   const getAIResponse = (userMessage: string) => {
     const responses = [
-      `That's an interesting perspective. Let me elaborate on that a bit further. When we consider the implications of what you've shared, several key points come to mind. First, it's important to understand the context and how it relates to broader concepts. This allows us to develop a more comprehensive understanding of the situation. Would you like me to explore any specific aspect of this in more detail?`,
+      `Congratulations on your upcoming graduation! As you step into the next phase of your journey, consider exploring opportunities that align with both your skills and passions. Networking with professionals in your field and seeking mentorship can open doors you might not expect. Remember, your first job is a stepping stone—focus on learning and growth. Would you like tips on resume building or interview preparation?`,
 
-      `I appreciate you sharing that. From what I understand, there are multiple layers to consider here. The initial aspect relates to the fundamental principles we're discussing, but there's also a broader context to consider. This reminds me of similar scenarios where the underlying patterns reveal interesting connections. What aspects of this would you like to explore further?`,
+      `Graduating is a huge milestone! Now is a great time to reflect on your strengths and interests. Research industries that excite you, and don't hesitate to reach out to alumni or career advisors for guidance. Building a strong LinkedIn profile and attending career fairs can help you connect with potential employers. Are you interested in advice on job searching or career planning?`,
 
-      `Thank you for bringing this up. It's a fascinating topic that deserves careful consideration. When we analyze the details you've provided, we can identify several important elements that contribute to our understanding. This kind of discussion often leads to valuable insights and new perspectives. Is there a particular element you'd like me to focus on?`,
+      `As you prepare to graduate, think about the kind of work environment and culture where you'll thrive. Consider internships or entry-level roles that offer learning opportunities and skill development. It's normal to feel uncertain—many graduates do. Would you like resources for exploring different career paths or tips for transitioning from student to professional?`,
 
-      `Your message raises some compelling points. Let's break this down systematically to better understand the various components involved. There are several key factors to consider, each contributing to the overall picture in unique ways. This kind of analysis often reveals interesting patterns and connections that might not be immediately apparent. What specific aspects would you like to delve into?`,
+      `The transition from student to professional life can be both exciting and challenging. Stay open to new experiences and be proactive in seeking feedback and growth. Remember, it's okay if your first job isn't your dream job—each experience will help you discover what you truly want. Would you like advice on networking, personal branding, or setting career goals?`,
     ];
 
     return responses[Math.floor(Math.random() * responses.length)];
@@ -522,10 +538,47 @@ export default function ChatInterface() {
 
           <h1 className="text-base font-medium text-foreground">U2C</h1>
 
-          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
-            <PenSquare className="h-5 w-5 text-muted-foreground" />
-            <span className="sr-only">New Chat</span>
-          </Button>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="cursor-pointer">
+                  {/* If you have a user image, use <AvatarImage src={user.image} /> */}
+                  <AvatarFallback>
+                    {user.student_name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-0.5">
+                    <span className="text-sm font-medium leading-none">
+                      {user.student_name}
+                    </span>
+                    <span className="text-xs font-medium leading-none">
+                      {user.student_id}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {user.student_department} / {user.student_major}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>Theme</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <ThemeToggleMenu />
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} variant="destructive">
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
         </div>
       </header>
 
@@ -584,7 +637,7 @@ export default function ChatInterface() {
                 placeholder={
                   isStreaming ? "Waiting for response..." : "Ask Anything"
                 }
-                className="min-h-[24px] max-h-[160px] w-full rounded-3xl border-0 bg-transparent text-foreground placeholder:text-muted-foreground placeholder:text-base focus-visible:ring-0 focus-visible:ring-offset-0 text-base pl-2 pr-4 pt-0 pb-0 resize-none overflow-y-auto leading-tight shadow-none"
+                className="min-h-[24px] max-h-[160px] w-full rounded-3xl border-0 !bg-transparent text-foreground placeholder:text-muted-foreground placeholder:text-base focus-visible:ring-0 focus-visible:ring-offset-0 text-base pl-2 pr-4 pt-0 pb-0 resize-none overflow-y-auto leading-tight shadow-none"
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
